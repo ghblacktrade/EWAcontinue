@@ -22,8 +22,8 @@ const Field = <T extends Record<string, any>>({
                 <>
                     <View
                         className={cn(
-                            'bg-silver w-full border rounded pb-4 pt-2.5 px-4 my-1.5',
-                            error ? 'border-red-500' : 'border-transparent'
+                            'bg-blue w-full border rounded pb-4 pt-2.5 px-4 my-1.5',
+                            error ? 'border-red-500' : 'border-green-700'
                         )}
                     >
                         <TextInput

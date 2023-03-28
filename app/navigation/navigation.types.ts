@@ -3,6 +3,7 @@ import {ComponentType} from "react";
 export type TypeRootStackParamList = {
     Auth: undefined
     Home: undefined
+    Err404: undefined
 
 } & TypeRootStackParamAdmin
 

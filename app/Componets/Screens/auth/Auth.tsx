@@ -4,7 +4,6 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {IAuthFormData} from "../../../../shared/types/auth.interface";
 import Loader from "../../UI/Loader";
 import Button from "../../UI/Button";
-import TestComponent from "../admin/home/TestComponent";
 import AuthFields from "./AuthFields";
 import DismissKeyboard from "../../UI/form-elements/fields/DismissKeyboard";
 
@@ -23,9 +22,9 @@ const Auth: FC = () => {
 
     return (
         <DismissKeyboard>
-        <View className='mx-10 items-center justify-center h-full '>
+        <View className='mx-10 items-center justify-center h-full'>
             <View className='w-9/12'>
-                <Text className='text-center text-black text-4xl font-bold mb-2.5'>
+                <Text className='text-center text-black text-4xl font-bold mb-2.5 text-blue-600'>
                     {isReg ? 'Register' : 'Login'}
                 </Text>
                 {isLoading ? (
@@ -33,11 +32,11 @@ const Auth: FC = () => {
                 ) : (
                     <>
                         <AuthFields control={control} isPassRequired  />
-                        <Button className='rounded-lg border-2 p-2 left-0.5' onPress={handleSubmit(onSubmit)}>
-                            Go to watch
+                        <Button className='rounded-lg border-2 p-2 left-0.5 border-red-500' onPress={handleSubmit(onSubmit)}>
+                            Sign in
                         </Button>
                         <Pressable onPress={() => setIsReg(!isReg)}>
-                            <Text className='text-black opacity-30 text-right text-base mt-3'>
+                            <Text className='text-black opacity-30 text-right text-base mt-3 colors-#2563eb'>
                                 {isReg ? 'Login' : 'Register'}
                             </Text>
                         </Pressable>

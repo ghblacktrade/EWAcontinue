@@ -4,6 +4,6 @@ import {Dispatch, SetStateAction} from "react";
 export type TypeUserState = IUser | null
 
 export interface IContext {
-    user: TypeUserState,
+    user: TypeUserState
     setUser:  Dispatch<SetStateAction<TypeUserState>>
 }
