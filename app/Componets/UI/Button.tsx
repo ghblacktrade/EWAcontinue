@@ -13,7 +13,7 @@ const Button: FC<PropsWithChildren<IButton>> = ({
         <Pressable className={cn('self-center mt-3.5', className)} {...rest}>
                 {icon && <Feather name={icon} size={18} color='black' />}
                 <Text
-                    className={cn('text-black text-center font-medium text-lg ', {
+                    className={cn('text-white text-center font-medium text-lg', {
                         'ml-2': !!icon
                     })}
                 >

@@ -4,10 +4,10 @@ import {IRoute} from "./navigation.types";
 import { adminRoutes } from "./admin.routes";
 
 export const userRoutes: IRoute[] = [
-    {
-        name: 'Home',
-        component: Home
-    },
+    // {
+    //     name: 'Home',
+    //     component: Home
+    // },
     {
         name: 'Auth',
         component: Auth

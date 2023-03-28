@@ -1,21 +1,22 @@
+import { NavigationContainer } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Auth from 'app/Componets/Screens/auth/Auth';
-import Err404 from 'app/Componets/Screens/system/err404';
-import { useAuth } from 'app/hooks/useAuth';
+import Auth from '../Componets/Screens/auth/Auth';
+import Err404 from '../Componets/Screens/system/err404';
+import { useAuth } from '../hooks/useAuth';
 import React, {FC, PropsWithChildren} from 'react';
 import {TypeRootStackParamList} from './navigation.types';
 import {routes, userRoutes} from './user.routes';
 
 const Stack = createNativeStackNavigator<TypeRootStackParamList>()
 
-const PrivateNavigation: FC = () => {
+const PrivateNavigator: FC = () => {
     const {user}  = useAuth()
 
     return (
         <Stack.Navigator screenOptions={{
             headerShown: false,
             contentStyle: {
-                backgroundColor: '#2f3c3d'
+                backgroundColor: '#001a2f'
             }
         }}>
             {user ? routes.map(route => user.isAdmin || !route.isAdmin ? (
@@ -30,4 +31,4 @@ const PrivateNavigation: FC = () => {
     );
 };
 
-export default PrivateNavigation;
+export default PrivateNavigator;
