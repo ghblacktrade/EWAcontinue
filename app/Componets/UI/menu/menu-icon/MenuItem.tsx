@@ -1,4 +1,4 @@
-import {getColor} from 'app/config/colors.config';
+import {getColor} from '../../../../config/colors.config';
 import {TypeRootStackParamList} from 'app/navigation/navigation.types';
 import React, {FC} from 'react';
 import {Pressable, Text} from 'react-native';
