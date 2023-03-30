@@ -17,7 +17,7 @@ const MenuItem: FC<IMenuItem> = ({currentRoute, item, nav}) => {
 
     return (
         <Pressable className='items-center w-[20%]' onPress={() => nav(item.path)}>
-            <Feather name={item.iconName} size={26} color={isActive ? getColor('green') : getColor('red')} />
+            <Feather name={item.iconName} size={26} color={isActive ? getColor('green') : getColor('white')} />
         </Pressable>
     );
 };

@@ -1,7 +1,8 @@
 const colorsConfig = {
     blue: '#0891b2',
-    green: '#16a34a',
-    red: '#dc2626'
+    green: 'rgba(12,54,61,0.99)',
+    red: '#dc2626',
+    white: '#ccebff'
 }
 
 

@@ -3,9 +3,8 @@ import Auth from '../Componets/Screens/auth/Auth'
 import {IRoute} from "./navigation.types";
 import { adminRoutes } from "./admin.routes";
 import Classification from "../Componets/Screens/classification/Classification";
-import Rules from "../Componets/Screens/rulesAndGuidelines/Rules";
-import Notation from "../Componets/Screens/notation/Notation";
 import Glossary from "../Componets/Screens/glossary/Glossary";
+import Profile from "../Componets/Screens/notation/Profile";
 
 export const userRoutes: IRoute[] = [
     {
@@ -22,12 +21,8 @@ export const userRoutes: IRoute[] = [
         component: Classification
     },
     {
-        name: 'RulesAndGuidelines',
-        component: Rules
-    },
-    {
-        name: 'Notation',
-        component: Notation
+        name: 'Profile',
+        component: Profile
     },
     {
         name: 'GlossaryOfTerms',

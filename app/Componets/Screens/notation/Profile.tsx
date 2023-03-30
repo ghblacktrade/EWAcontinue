@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-const Notation :FC = () => {
+const Profile :FC = () => {
     return (
         <div>
 
@@ -8,4 +8,4 @@ const Notation :FC = () => {
     );
 };
 
-export default Notation;
+export default Profile;

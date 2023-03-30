@@ -4,9 +4,9 @@ export type TypeRootStackParamList = {
     Auth: undefined
     Home: undefined
     Profile: undefined
+    Search: undefined
     Classification: undefined
     RulesAndGuidelines: undefined
-    Notation: undefined
     GlossaryOfTerms: undefined
     Err404: undefined
 

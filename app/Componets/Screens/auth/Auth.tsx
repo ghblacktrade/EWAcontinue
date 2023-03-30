@@ -25,22 +25,24 @@ const Auth: FC = () => {
         <DismissKeyboard>
         <View className='mx-10 items-center justify-center h-full'>
             <View className='w-9/12'>
-                <Text className='text-center text-white text-4xl font-bold mb-2.5 text-blue-600'>
-                    {isReg ? 'Register' : 'Login'}
+                <Text className='text-center text-black text-4xl font-bold mb-2.5 text-blue-600'>
+                    {isReg ? 'Sign Up' : 'Sign In'}
                 </Text>
                 {isLoading ? (
                     <Loader/>
                 ) : (
                     <>
                         <AuthFields control={control} isPassRequired  />
-                        <Button className='rounded-lg border-2 p-2 left-0.5 border-red-500 bg-red-500' onPress={handleSubmit(onSubmit)}>
-                            Sign in
-                        </Button>
-                        <Pressable onPress={() => setIsReg(!isReg)}>
-                            <Text className='text-white  text-right text-base mt-3 colors-#2563eb'>
-                                {isReg ? 'Login' : 'Register'}
+                        <Button className='rounded-lg border-2 p-2 left-0.5 border-black-500 bg-white' onPress={handleSubmit(onSubmit)}>
+                            <Text>
+                                Sign In
                             </Text>
-                        </Pressable>
+                        </Button>
+                        {/*<Pressable onPress={() => setIsReg(!isReg)}>*/}
+                        {/*    <Text className='text-white  text-right text-base mt-3 colors-#2563eb'>*/}
+                        {/*        {isReg ? 'Sign In' : 'Sign Up'}*/}
+                        {/*    </Text>*/}
+                        {/*</Pressable>*/}
                     </>
                 )}
             </View>
