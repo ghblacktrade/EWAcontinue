@@ -16,7 +16,7 @@ const PrivateNavigator: FC = () => {
         <Stack.Navigator screenOptions={{
             headerShown: false,
             contentStyle: {
-                backgroundColor: '#001a2f'
+                backgroundColor: '#ffffff'
             }
         }}>
             {user ? routes.map(route => user.isAdmin || !route.isAdmin ? (

@@ -8,6 +8,8 @@ import AuthFields from "./AuthFields";
 import DismissKeyboard from "../../UI/form-elements/fields/DismissKeyboard";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TypeRootStackParamList } from 'app/navigation/navigation.types';
+import {getColor} from '../../../config/colors.config';
+
 
 const Auth: FC = () => {
     const [isReg, setIsReg] = useState(false)
@@ -25,7 +27,7 @@ const Auth: FC = () => {
         <DismissKeyboard>
         <View className='mx-10 items-center justify-center h-full'>
             <View className='w-9/12'>
-                <Text className='text-center text-black text-4xl font-bold mb-2.5 text-blue-600'>
+                <Text className='text-center text-4xl font-bold mb-2.5 text-black'>
                     {isReg ? 'Sign Up' : 'Sign In'}
                 </Text>
                 {isLoading ? (
@@ -35,7 +37,7 @@ const Auth: FC = () => {
                         <AuthFields control={control} isPassRequired  />
                         <Button className='rounded-lg border-2 p-2 left-0.5 border-black-500 bg-white' onPress={handleSubmit(onSubmit)}>
                             <Text>
-                                Sign In
+                                Continue
                             </Text>
                         </Button>
                         {/*<Pressable onPress={() => setIsReg(!isReg)}>*/}
