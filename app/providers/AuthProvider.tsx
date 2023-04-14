@@ -1,11 +1,11 @@
 import React, {createContext, FC, PropsWithChildren, useEffect, useState} from 'react';
 import {View} from "react-native";
-import {IContext, TypeUserState} from "./auth-provider.interface";
+import {ContextProps, TypeUserState} from "./auth-provider.interface";
 import * as SplashScreen from 'expo-splash-screen'
 import { IUser } from 'shared/types/user.interface';
 
 
-export const AuthContext = createContext({} as IContext)
+export const AuthContext = createContext({} as ContextProps)
 
 let ignore = SplashScreen.preventAutoHideAsync()
 

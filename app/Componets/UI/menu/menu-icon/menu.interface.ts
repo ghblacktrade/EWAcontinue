@@ -1,7 +1,7 @@
 import { TypeRootStackParamList } from "app/navigation/navigation.types"
 import { TypeFeatherIconNames } from "shared/types/icon.types"
 
-export interface IMenu  {
+export interface MenuProps  {
     iconName: TypeFeatherIconNames
     path: keyof TypeRootStackParamList
 }

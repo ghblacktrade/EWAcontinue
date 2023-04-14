@@ -2,17 +2,17 @@ import {getColor} from '../../../../config/colors.config';
 import {TypeRootStackParamList} from 'app/navigation/navigation.types';
 import React, {FC} from 'react';
 import {Pressable, Text} from 'react-native';
-import {IMenu, TypeNavigate} from './menu.interface';
+import {MenuProps, TypeNavigate} from './menu.interface';
 import { Feather } from '@expo/vector-icons'
 
 
-interface IMenuItem {
-    item: IMenu,
+interface MenuItemProps {
+    item: MenuProps,
     nav: TypeNavigate
     currentRoute?: string
 }
 
-const MenuItem: FC<IMenuItem> = ({currentRoute, item, nav}) => {
+const MenuItem: FC<MenuItemProps> = ({currentRoute, item, nav}) => {
     const isActive = currentRoute === item.path
 
     return (

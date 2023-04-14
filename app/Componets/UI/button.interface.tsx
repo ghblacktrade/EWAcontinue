@@ -3,7 +3,7 @@ import {TypeFeatherIconNames} from "../../../shared/types/icon.types";
 
 
 
-export interface IButton extends PressableProps {
+export interface ButtonProps extends PressableProps {
     className?: string
     icon?: TypeFeatherIconNames
 }

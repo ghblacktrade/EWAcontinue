@@ -7,14 +7,14 @@ import { menuItems } from './menu.data';
 import { TypeNavigate } from './menu.interface';
 import MenuItem from './MenuItem';
 
-export interface IMenuSet {
+export interface MenuSetProps {
     nav: TypeNavigate
     currentRoute?:  string
 }
 
 
 
-const Menu:FC<IMenuSet> = (props) => {
+const Menu:FC<MenuSetProps> = (props) => {
 
     const {bottom} = useSafeAreaInsets()
 

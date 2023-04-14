@@ -8,13 +8,13 @@ import InputLogin from "../../UI/form-elements/fields/Field";
 import Field from "../../UI/form-elements/fields/Field";
 
 
-interface IAuthFields {
+interface AuthFieldsProps {
     control: Control<IAuthFormData>
     isPassRequired?: boolean
 }
 
 
-const AuthFields: FC<IAuthFields> = ({control, isPassRequired}) => {
+const AuthFields: FC<AuthFieldsProps> = ({control, isPassRequired}) => {
     return (
         <>
             <Field <IAuthFormData>

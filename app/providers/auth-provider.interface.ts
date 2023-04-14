@@ -3,7 +3,7 @@ import {Dispatch, SetStateAction} from "react";
 
 export type TypeUserState = IUser | null
 
-export interface IContext {
+export interface ContextProps {
     user: TypeUserState
     setUser:  Dispatch<SetStateAction<TypeUserState>>
 }
