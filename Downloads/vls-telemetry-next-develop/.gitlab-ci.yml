@@ -1,0 +1,121 @@
+variables:
+  DOCKER_REGISTRY_IMAGE: nexus.element-soft.com/vls/vls-telemetry-next
+  DOCKER_BUILD_IMAGE: node:20-alpine
+  CACHE_KEY: vls-telemetry-next-cache
+
+stages:
+  - install
+  - lint
+  - env
+  - publish
+  - notification
+default:
+  image: $DOCKER_BUILD_IMAGE
+  cache: &cache
+    key: $CACHE_KEY
+    paths:
+      - .pnpm-store
+      - ./node_modules
+      - .eslintcache
+    policy: pull-push
+
+.yarn_pnpm:
+  before_script:
+    - yarn global add pnpm
+    - pnpm config set store-dir .pnpm-store
+
+install-lint:
+  cache:
+    <<: *cache
+    policy: pull-push
+  stage: install
+  tags:
+    - test
+  image: $DOCKER_BUILD_IMAGE
+  extends:
+    - .yarn_pnpm
+  script:
+    - pnpm i --frozen-lockfile
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    
+lint:
+  cache:
+    <<: *cache
+    policy: pull-push
+  stage: lint
+  tags:
+    - test
+  image: $DOCKER_BUILD_IMAGE
+  extends:
+    - .yarn_pnpm
+  script:
+    - pnpx prisma generate
+    - pnpm lint
+  dependencies:
+    - install-lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+env:
+  stage: env
+  tags:
+   - shell
+  script:
+      - echo 'GIT_COMMIT='$CI_COMMIT_SHORT_SHA >> .env
+      - echo 'GIT_BRANCH='$CI_COMMIT_BRANCH >> .env
+      - echo 'GIT_TIMESTAMP='$CI_COMMIT_TIMESTAMP >> .env
+
+  artifacts:
+    paths:
+     - ./.env
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ "develop" && $CI_PIPELINE_SOURCE != "merge_request_event"
+    - if: $CI_COMMIT_BRANCH =~ /^release.*/ && $CI_PIPELINE_SOURCE != "merge_request_event"
+
+
+publish:
+  stage: publish
+  tags:
+      - test
+  image: docker:24.0.2
+  services:
+    - name: docker:24.0-dind
+      alias: docker
+  dependencies:
+    - env
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login nexus.element-soft.com --username $DOCKER_USERNAME --password-stdin
+  script:
+    - docker build -t $DOCKER_REGISTRY_IMAGE:${CI_COMMIT_BRANCH//\//-} .
+    - docker push $DOCKER_REGISTRY_IMAGE:${CI_COMMIT_BRANCH//\//-}
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ "develop" && $CI_PIPELINE_SOURCE != "merge_request_event"
+    - if: $CI_COMMIT_BRANCH =~ /^release.*/ && $CI_PIPELINE_SOURCE != "merge_request_event"
+
+success_notification:
+  stage: notification
+  tags:
+    - shell
+  script:
+    - wget https://gitlab.element-soft.com/pub/discord-notify/-/raw/develop/script.sh
+    - chmod +x script.sh
+    - ./script.sh success $DISCORD_WEBHOOK
+  when: on_success
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release.*/ && $CI_PIPELINE_SOURCE != "merge_request_event"
+
+failure_notification:
+  stage: notification
+  tags:
+    - shell
+  script:
+    - wget https://gitlab.element-soft.com/pub/discord-notify/-/raw/develop/script.sh
+    - chmod +x script.sh
+    - ./script.sh failure $DISCORD_WEBHOOK
+  when: on_failure
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ "develop" && $CI_PIPELINE_SOURCE != "merge_request_event"
+    - if: $CI_COMMIT_BRANCH =~ /^release.*/ && $CI_PIPELINE_SOURCE != "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+

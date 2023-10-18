@@ -1,0 +1,479 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model batteries {
+  id              String  @id @default(uuid()) @db.Uuid
+  code            String? @unique()
+  serialNumber    String? @unique()
+  hardwareVersion String?
+  softwareVersion String?
+
+  electricityCost  Json @default("{}")
+  chargingSchedule Json @default("{\"stopHHMM\": \"00:00\", \"startHHMM\": \"00:00\"}")
+  autonomySchedule Json @default("{\"stopHHMM\": \"00:00\", \"startHHMM\": \"00:00\"}")
+
+  batteryModuleCount Int    @default(1)
+  batteryCapacityKWh Float  @default(2) @db.Real
+  solarPanelPowerW   Float  @default(0) @db.Real
+  gridPowerKW        Float? @db.Real
+  invertorPowerKW    Float? @db.Real
+
+  battery_commands     battery_commands[]
+  telemetry_warnings   telemetry_warning[]
+  telemetry            telemetry[]
+  telemetry_statistics telemetry_statistics[]
+  updates              firmware_update[]
+
+  connectionStatus connectionStatus @default(noConnection)
+  connectToEssType ConnectType?
+
+  ess   ess?    @relation(fields: [essId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  essId String? @db.Uuid
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  connectToEssDate   DateTime?
+  lastDateDeviceInfo DateTime?
+}
+
+model battery_commands {
+  id             String        @id @default(uuid()) @db.Uuid
+  command        String
+  status         CommandStatus @default(new)
+  dataToRollback Json?
+  batteries      batteries     @relation(fields: [batteryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  batteryId      String        @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([command, batteryId, status, createdAt])
+}
+
+model City {
+  id               String                @id @default(uuid()) @db.Uuid
+  openWeatherMapId Int?                  @unique()
+  name             String
+  location         Unsupported("point")? @default(dbgenerated("point((0.0)::double precision, (0.0)::double precision)"))
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  countryId String    @db.Uuid
+  country   countries @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  users User[]
+  ess   ess[]
+
+  @@index([location], type: Gist)
+  @@index([name])
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique()
+  phone        String?
+  password     String?
+  isActive     Boolean? @default(false)
+  isRegistered Boolean? @default(true)
+  role         Role     @default(client)
+
+  firstName String?
+  lastName  String?
+
+  city       City?   @relation(fields: [cityId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cityId     String? @db.Uuid
+  district   String?
+  address    String?
+  postalCode String?
+
+  devices    devices[]
+  ess        UsersOnEss[]
+  recipients Recipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+}
+
+model ess {
+  id           String      @id @default(uuid()) @db.Uuid
+  code         String      @unique()
+  label        String?
+  timeZone     String      @default("Europe/Moscow")
+  phase        EssPhase    @default(phase1)
+  phaseEntry   EssPhase    @default(phase1)
+  haSolarPanel Boolean     @default(true)
+  color        String      @default("#000000")
+  logoVariant  LogoVariant @default(light)
+
+  city       City    @relation(fields: [cityId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  cityId     String  @db.Uuid
+  district   String?
+  address    String
+  postalCode String
+
+  installationDate DateTime
+  users            UsersOnEss[]
+  batteries        batteries[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UsersOnEss {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  userId String @db.Uuid
+  ess    ess    @relation(fields: [essId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  essId  String @db.Uuid
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  access    AccessEss @default(guest)
+  alias     String    @default("My VOLTS")
+
+  @@id([userId, essId])
+}
+
+model devices {
+  id       String   @id @default(uuid()) @db.Uuid
+  pushId   String   @unique()
+  platform Platform
+  isDebug  Boolean  @default(false)
+  locale   Locale   @default(en)
+
+  User   User   @relation(fields: [UserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  UserId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model countries {
+  id     String @id @default(uuid()) @db.Uuid
+  name   String @unique()
+  code   String @unique()
+  cities City[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model telemetry {
+  batteryId               String @db.Uuid
+  chargeLevelPercent      Float  @default(0) @db.Real
+  photovoltaticsPowerW    Float  @default(0) @db.Real
+  gridConsumptionPowerW   Float  @default(0) @db.Real
+  chargePowerW            Float  @default(0) @db.Real
+  houseLoadPowerW         Float  @default(0) @db.Real
+  gridConsumptionEnergyWh Float  @default(0) @db.Real
+  generatedEnergyTotalWh  Float  @default(0) @db.Real
+  generatedEnergyYearWh   Float  @default(0) @db.Real
+  generatedEnergyMonthWh  Float  @default(0) @db.Real
+  generatedEnergyDayWh    Float  @default(0) @db.Real
+  phaseAPowerW            Float  @default(0) @db.Real
+  phaseBPowerW            Float  @default(0) @db.Real
+  phaseCPowerW            Float  @default(0) @db.Real
+  phaseAUrmsV             Float  @default(0) @db.Real
+  phaseBUrmsV             Float  @default(0) @db.Real
+  phaseCUrmsV             Float  @default(0) @db.Real
+  phaseAIrmsA             Float  @default(0) @db.Real
+  phaseBIrmsA             Float  @default(0) @db.Real
+  phaseCIrmsA             Float  @default(0) @db.Real
+  photovoltaticsVoltageV  Float  @default(0) @db.Real
+  outputApparentPowerVA   Float  @default(0) @db.Real
+  outputVoltageV          Float  @default(0) @db.Real
+
+  solarPanel1Status   String?
+  chargingStatus      ChargingStatus?
+  isConnectedToGrid   Boolean?
+  isConnectedToHouse  Boolean?
+  chargingCurrentA    Float?          @db.Real
+  batteryVoltageV     Float?          @db.Real
+  gridVoltageV        Float?          @db.Real
+  outputActivePowerW  Float?          @db.Real
+  dischargingCurrentA Float?          @db.Real
+
+  phaseAStatus    String?
+  phaseBStatus    String?
+  phaseCStatus    String?
+  frequencyStatus String?
+
+  batteries batteries @relation(fields: [batteryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+
+  @@id([batteryId, createdAt])
+}
+
+model telemetry_warning {
+  id           String                       @id @default(uuid()) @db.Uuid
+  type         TelemetryWarningType
+  protocolType TelemetryWarningProtocolType
+  message      String
+  bitKey       String
+  bitValue     String?
+  batteries    batteries                    @relation(fields: [batteryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  batteryId    String                       @db.Uuid
+  createdAt    DateTime                     @db.Timestamp(6)
+}
+
+model telemetry_statistics {
+  period                       TelemetryStatisticsPeriod @default(day)
+  startTimestamp               DateTime                  @db.Timestamp(6)
+  endTimestamp                 DateTime                  @db.Timestamp(6)
+  generatedEnergyWh            Float?                    @db.Real
+  consumedEnergyWh             Float?                    @db.Real
+  averageChargeLevelPercent    Float?                    @db.Real
+  averagePhotovoltaticsPowerW  Float?                    @db.Real
+  averageGridConsumptionPowerW Float?                    @db.Real
+  averageHouseLoadPowerW       Float?                    @db.Real
+  minGridVoltageV              Float?                    @db.Real
+  maxGridVoltageV              Float?                    @db.Real
+  minPhaseAUrmsV               Float?                    @db.Real
+  maxPhaseAUrmsV               Float?                    @db.Real
+  minPhaseBUrmsV               Float?                    @db.Real
+  maxPhaseBUrmsV               Float?                    @db.Real
+  minPhaseCUrmsV               Float?                    @db.Real
+  maxPhaseCUrmsV               Float?                    @db.Real
+
+  batteryId String    @db.Uuid
+  batteries batteries @relation(fields: [batteryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@id([batteryId, startTimestamp, endTimestamp])
+}
+
+model firmware {
+  id              String            @id @default(uuid()) @db.Uuid
+  firmwareVersion String
+  hardwareVersion String
+  file            Bytes
+  fileName        String
+  fileSize        Int
+  fileType        String
+  status          FirmwareStatus    @default(draft)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  updates         firmware_update[]
+
+  @@unique([firmwareVersion, hardwareVersion])
+}
+
+model firmware_update {
+  id String @id @default(uuid()) @db.Uuid
+
+  firmware   firmware @relation(fields: [firmwareId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  firmwareId String   @db.Uuid
+
+  batteries batteries @relation(fields: [batteryId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  batteryId String    @db.Uuid
+
+  status    FirmwareUpdateStatus @default(REQUESTING)
+  errorInfo String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([firmwareId, batteryId])
+}
+
+model Recipient {
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId         String       @db.Uuid
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  notificationId String       @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  read    Boolean               @default(false)
+  channel NotificationChannel[]
+
+  @@id([userId, notificationId])
+}
+
+model Notification {
+  id         String                 @id @default(uuid()) @db.Uuid
+  trigger    NotificationTrigger
+  recipients Recipient[]
+  entityType NotificationEntityType
+  entityId   String?                @db.Uuid
+  type       NotificationType       @default(info)
+  title      String
+  message    String
+  additional Json?
+  createdAt  DateTime               @default(now())
+}
+
+model Translation {
+  key String @id
+  en  String @default("notExistingKey")
+  ru  String @default("notExistingKey")
+}
+
+view materialized_five_view {
+  start                        DateTime @db.Timestamp(6)
+  batteryId                    String   @db.Uuid
+  averageChargeLevelPercent    Float
+  averagePhotovoltaticsPowerW  Float
+  averageGridConsumptionPowerW Float
+  averageHouseLoadPowerW       Float
+  minGridVoltageV              Float    @db.Real
+  maxGridVoltageV              Float    @db.Real
+  generatedEnergyWh            Float    @db.Real
+  consumedEnergyWh             Float    @db.Real
+
+  minPhaseAUrmsV Float @db.Real
+  maxPhaseAUrmsV Float @db.Real
+  minPhaseBUrmsV Float @db.Real
+  maxPhaseBUrmsV Float @db.Real
+  minPhaseCUrmsV Float @db.Real
+  maxPhaseCUrmsV Float @db.Real
+
+  @@unique([start, batteryId])
+}
+
+enum Locale {
+  en
+  ru
+}
+
+enum Platform {
+  web
+  ios
+  android
+  test
+  admin
+  demo
+}
+
+enum NotificationEntityType {
+  system
+  user
+  control_pcb
+  ess
+}
+
+enum NotificationType {
+  info
+  warning
+  fail
+}
+
+enum NotificationTrigger {
+  register
+  change_email
+  restore_password
+  support
+  user_delete
+  control_pcb_telemetry
+}
+
+enum NotificationChannel {
+  email
+  push
+}
+
+enum LogoVariant {
+  light
+  dark
+}
+
+enum EssPhase {
+  phase1
+  phase3
+}
+
+enum TelemetryStatisticsPeriod {
+  minute
+  hour
+  day
+  month
+}
+
+enum FirmwareUpdateStatus {
+  REQUESTING
+  REQUEST_FAILED
+  PREPARING
+  DOWNLOADING
+  INSTALLING
+  INSTALLED
+  PEND_INSTALL
+  PREPARE_FAILED
+  DOWNLOAD_FAILED
+  INSTALL_VERIFICATION_FAILED
+  INSTALL_FAILED
+  AUTO_FAILED
+}
+
+enum TelemetryWarningProtocolType {
+  bit18
+  bit30
+  unknown
+}
+
+enum TelemetryWarningType {
+  warning
+  error
+  reserved
+}
+
+enum CommandStatus {
+  new
+  finished
+  failed
+}
+
+enum FirmwareStatus {
+  draft
+  active
+  archive
+}
+
+enum Role {
+  admin
+  moderator
+  installer
+  client
+  service_engineer
+}
+
+enum AccessEss {
+  owner
+  guest
+  service_engineer
+}
+
+enum ConnectType {
+  master
+  slave
+}
+
+enum ChargingStatus {
+  none
+  charging
+  discharging
+  transition
+  charged
+}
+
+enum connectionStatus {
+  wifi
+  gprs
+  local
+  noConnection
+}
+
+enum solarPanelStatus {
+  abnormal
+  notCharging
+  charging
+}
